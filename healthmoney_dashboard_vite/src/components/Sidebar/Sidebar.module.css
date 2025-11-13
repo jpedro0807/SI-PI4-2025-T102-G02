@@ -1,0 +1,31 @@
+.sidebar{
+width:260px;
+background:linear-gradient(180deg,#ffffff,#fbfdfe);
+border-right:1px solid rgba(15,23,42,0.04);
+padding:20px 14px;
+height:100vh;
+position:fixed;
+top:0;left:0;
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+transition:width .25s ease;
+box-shadow: var(--shadow);
+}
+.collapsed{width:80px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{background:#06b6d4;color:white;padding:10px;border-radius:10px;font-size:18px}
+.title{display:flex;flex-direction:column}
+.title small{color:var(--muted);font-size:12px}
+
+
+.nav{margin-top:24px;display:flex;flex-direction:column;gap:6px}
+.item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;border:none;background:transparent;cursor:pointer;font-size:15px;color:rgba(15,23,42,0.8);transition:background .16s,transform .12s}
+.item:hover{background:rgba(16,185,129,0.06);transform:translateX(4px)}
+.icon{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;color:var(--muted)}
+.label{flex:1;text-align:left}
+.active{background:linear-gradient(90deg, rgba(236,253,245,1), rgba(255,255,255,0.6));box-shadow:0 6px 16px rgba(6,182,212,0.06)}
+
+
+.footer{display:flex;justify-content:center;padding-top:10px}
+.toggle{background:#eef2f4;border-radius:8px;padding:6px 10px;border:none;cursor:pointer}
