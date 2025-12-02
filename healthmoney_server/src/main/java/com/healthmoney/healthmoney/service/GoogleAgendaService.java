@@ -10,9 +10,10 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.healthmoney.healthmoney.dto.EventoDTO;
 import org.springframework.stereotype.Service;
-
+import java.util.List;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import com.google.api.services.calendar.model.Events;
 
 @Service
 public class GoogleAgendaService {
@@ -59,4 +60,24 @@ public class GoogleAgendaService {
         Calendar service = criarClienteGoogle(accessToken);
         service.events().delete("primary", eventId).execute();
     }
+
+// No arquivo GoogleAgendaService.java
+
+    public List<Event> listarProximosEventos(String accessToken) throws GeneralSecurityException, IOException {
+        Calendar service = criarClienteGoogle(accessToken);
+
+        // DateTime do Google Client
+        DateTime agora = new DateTime(System.currentTimeMillis());
+
+        Events events = service.events().list("primary")
+                .setTimeMin(agora) // Só eventos futuros
+                .setOrderBy("startTime") // Ordenar por data
+                .setSingleEvents(true) // Expande eventos recorrentes (importante!)
+                .execute();
+
+        return events.getItems();
+    }
+
+
+
 }

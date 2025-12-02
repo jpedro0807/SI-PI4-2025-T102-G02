@@ -8,6 +8,10 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/agenda")
@@ -48,6 +52,40 @@ public class CalendarController {
         } catch (Exception e) {
             return "Erro ao remover evento: " + e.getMessage();
         }
+    }
+
+    @GetMapping("/listar")
+    public List<Map<String, String>> listarEventos(OAuth2AuthenticationToken authentication) {
+        List<Map<String, String>> listaSimplificada = new ArrayList<>();
+
+        try {
+            String accessToken = getAccessToken(authentication);
+            List<Event> eventosGoogle = agendaService.listarProximosEventos(accessToken);
+
+            // Loop para pegar só os dados importantes
+            for (Event event : eventosGoogle) {
+                Map<String, String> resumo = new HashMap<>();
+                if (event.getSummary() != null) {
+                    resumo.put("id", event.getId()); // <--- AQUI ESTÁ O ID QUE VOCÊ PRECISA
+                    resumo.put("titulo", event.getSummary());
+
+                    // Tratamento para data (pode ser data-hora ou dia inteiro)
+                    if (event.getStart().getDateTime() != null) {
+                        resumo.put("inicio", event.getStart().getDateTime().toString());
+                    } else {
+                        resumo.put("inicio", event.getStart().getDate().toString()); // Evento de dia inteiro
+                    }
+                    listaSimplificada.add(resumo);
+                }
+
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Em caso de erro, retorna uma lista vazia ou trata como preferir
+        }
+
+        return listaSimplificada;
     }
 
     // Método auxiliar para extrair o token da sessão
