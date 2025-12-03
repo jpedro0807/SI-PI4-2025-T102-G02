@@ -4,6 +4,8 @@ import com.google.api.services.calendar.model.Event;
 import com.healthmoney.healthmoney.dto.EventoDTO;
 import com.healthmoney.healthmoney.service.GoogleAgendaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -14,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/agenda")
+@RequestMapping("/api/agenda")
 public class CalendarController {
 
     @Autowired
@@ -55,37 +57,54 @@ public class CalendarController {
     }
 
     @GetMapping("/listar")
-    public List<Map<String, String>> listarEventos(OAuth2AuthenticationToken authentication) {
-        List<Map<String, String>> listaSimplificada = new ArrayList<>();
+    public ResponseEntity<?> listarEventos(OAuth2AuthenticationToken authentication) {
+
+        // BLINDAGEM 🛡️: Se o usuário não estiver logado, para aqui!
+        if (authentication == null) {
+            // Retorna 401 (Unauthorized). Isso avisa o React que a sessão caiu.
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Sessão expirada ou usuário não autenticado.");
+        }
 
         try {
             String accessToken = getAccessToken(authentication);
             List<Event> eventosGoogle = agendaService.listarProximosEventos(accessToken);
 
-            // Loop para pegar só os dados importantes
-            for (Event event : eventosGoogle) {
-                Map<String, String> resumo = new HashMap<>();
-                if (event.getSummary() != null) {
-                    resumo.put("id", event.getId()); // <--- AQUI ESTÁ O ID QUE VOCÊ PRECISA
-                    resumo.put("titulo", event.getSummary());
+            // ... (seu código de mapeamento dos eventos continua igual) ...
+            List<Map<String, String>> listaSimplificada = new ArrayList<>();
 
-                    // Tratamento para data (pode ser data-hora ou dia inteiro)
-                    if (event.getStart().getDateTime() != null) {
-                        resumo.put("inicio", event.getStart().getDateTime().toString());
-                    } else {
-                        resumo.put("inicio", event.getStart().getDate().toString()); // Evento de dia inteiro
+            if (eventosGoogle != null) {
+                for (Event event : eventosGoogle) {
+                    if (event.getSummary() != null) {
+                        Map<String, String> resumo = new HashMap<>();
+                        resumo.put("id", event.getId());
+                        resumo.put("titulo", event.getSummary());
+
+                        // Tratamento Inicio
+                        if (event.getStart().getDateTime() != null) {
+                            resumo.put("inicio", event.getStart().getDateTime().toString());
+                        } else {
+                            resumo.put("inicio", event.getStart().getDate().toString());
+                        }
+
+                        // Tratamento Fim
+                        if (event.getEnd().getDateTime() != null) {
+                            resumo.put("fim", event.getEnd().getDateTime().toString());
+                        } else {
+                            resumo.put("fim", event.getEnd().getDate().toString());
+                        }
+
+                        listaSimplificada.add(resumo);
                     }
-                    listaSimplificada.add(resumo);
                 }
-
             }
+
+            return ResponseEntity.ok(listaSimplificada);
 
         } catch (Exception e) {
             e.printStackTrace();
-            // Em caso de erro, retorna uma lista vazia ou trata como preferir
+            return ResponseEntity.internalServerError().body("Erro ao buscar agenda: " + e.getMessage());
         }
-
-        return listaSimplificada;
     }
 
     // Método auxiliar para extrair o token da sessão

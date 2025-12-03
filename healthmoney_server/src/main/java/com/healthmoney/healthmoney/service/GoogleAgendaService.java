@@ -14,6 +14,8 @@ import java.util.List;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import com.google.api.services.calendar.model.Events;
+import com.google.api.services.calendar.model.EventAttendee;
+import java.util.Collections;
 
 @Service
 public class GoogleAgendaService {
@@ -38,8 +40,7 @@ public class GoogleAgendaService {
                 .setSummary(dto.titulo())
                 .setDescription(dto.descricao());
 
-        // Converte as Strings para o formato DateTime do Google
-        // Obs: O "-03:00" é o fuso horário (Brasília). Ajuste se necessário.
+        // LÓGICA DE DATAS (Mantenha igual ao que já estava)
         DateTime startDateTime = new DateTime(dto.dataInicio() + "-03:00");
         EventDateTime start = new EventDateTime()
                 .setDateTime(startDateTime)
@@ -52,8 +53,20 @@ public class GoogleAgendaService {
                 .setTimeZone("America/Sao_Paulo");
         event.setEnd(end);
 
-        // "primary" significa a agenda principal do usuário logado
-        return service.events().insert("primary", event).execute();
+        // --- LÓGICA NOVA: ADICIONAR CONVIDADO (PACIENTE) ---
+        if (dto.emailPaciente() != null && !dto.emailPaciente().isEmpty()) {
+            EventAttendee convidado = new EventAttendee();
+            convidado.setEmail(dto.emailPaciente());
+
+            // Adiciona à lista de participantes
+            event.setAttendees(Collections.singletonList(convidado));
+        }
+        // ---------------------------------------------------
+
+        // O parâmetro 'sendUpdates=all' força o envio do e-mail de convite na hora
+        return service.events().insert("primary", event)
+                .setSendUpdates("all")
+                .execute();
     }
 
     public void deletarEvento(String accessToken, String eventId) throws GeneralSecurityException, IOException {

@@ -16,10 +16,11 @@ Value = JSESSIONID=token pega no > f12 > apllication > Cookies
 # Body
 
 {
-"titulo": "Aniversario Hector",
-"dataInicio": "2025-01-27T15:00:00",
-"dataFim": "2025-01-27T18:00:00",
-"descricao": "Teste"
+"titulo": "Consulta Dr. Hector",
+"dataInicio": "2025-12-25T14:00:00",
+"dataFim": "2025-12-25T15:00:00",
+"descricao": "Consulta de rotina",
+"emailPaciente": "email.do.paciente@gmail.com"
 }
 
 ##########################################################################

@@ -1,32 +1,29 @@
-import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import React from "react";
+import { Routes, Route } from "react-router-dom";
 
+import Layout from "./components/Layout";
 
-import Layout from './components/Layout' 
-
-import DashboardPage from './pages/Dashboard/DashboardPage'
-import Pacientes from './pages/Pacientes/PacientesPage'
-import AgendaPage from './pages/Agenda/AgendaPage'
-import NotasFiscaisPage from './pages/NotasFiscais/NotasFiscaisPage'
-import RelatoriosPage from './pages/Relatorios/RelatoriosPage'
+import DashboardPage from "./pages/Dashboard/DashboardPage";
+import PacientesPage from "./pages/Pacientes/PacientesPage";
+import AgendaPage from "./pages/Agenda/AgendaPage";
+import NotasFiscaisPage from "./pages/NotasFiscais/NotasFiscaisPage";
+import RelatoriosPage from "./pages/Relatorios/RelatoriosPage";
 
 export default function App() {
-  return (
-    <Routes>
-    
-      <Route path="/" element={<Layout />}>
-     
-        <Route index element={<DashboardPage />} />
-        
-        <Route path='pacientes' element={<Pacientes />} />
-        
-     
-        <Route path='agenda' element={<AgendaPage></AgendaPage>} />
-        <Route path='notas' element={<NotasFiscaisPage></NotasFiscaisPage>} />
-        <Route path='relatorios' element={<RelatoriosPage/>} />
+	return (
+		<Routes>
+			<Route path='/' element={<Layout />}>
+				<Route index element={<DashboardPage />} />
 
-      </Route>
+				<Route path='pacientes' element={<PacientesPage />} />
 
-    </Routes>
-  )
+				<Route path='agenda' element={<AgendaPage></AgendaPage>} />
+				<Route
+					path='notas'
+					element={<NotasFiscaisPage></NotasFiscaisPage>}
+				/>
+				<Route path='relatorios' element={<RelatoriosPage />} />
+			</Route>
+		</Routes>
+	);
 }
