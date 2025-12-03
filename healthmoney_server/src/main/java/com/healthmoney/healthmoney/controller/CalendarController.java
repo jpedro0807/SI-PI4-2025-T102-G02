@@ -4,6 +4,8 @@ import com.google.api.services.calendar.model.Event;
 import com.healthmoney.healthmoney.dto.EventoDTO;
 import com.healthmoney.healthmoney.service.GoogleAgendaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -55,14 +57,21 @@ public class CalendarController {
     }
 
     @GetMapping("/listar")
-    public List<Map<String, String>> listarEventos(OAuth2AuthenticationToken authentication) {
-        // ... (mesma validação de autenticação de antes) ...
+    public ResponseEntity<?> listarEventos(OAuth2AuthenticationToken authentication) {
 
-        List<Map<String, String>> listaSimplificada = new ArrayList<>();
+        // BLINDAGEM 🛡️: Se o usuário não estiver logado, para aqui!
+        if (authentication == null) {
+            // Retorna 401 (Unauthorized). Isso avisa o React que a sessão caiu.
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Sessão expirada ou usuário não autenticado.");
+        }
 
         try {
             String accessToken = getAccessToken(authentication);
             List<Event> eventosGoogle = agendaService.listarProximosEventos(accessToken);
+
+            // ... (seu código de mapeamento dos eventos continua igual) ...
+            List<Map<String, String>> listaSimplificada = new ArrayList<>();
 
             if (eventosGoogle != null) {
                 for (Event event : eventosGoogle) {
@@ -71,30 +80,31 @@ public class CalendarController {
                         resumo.put("id", event.getId());
                         resumo.put("titulo", event.getSummary());
 
-                        // TRATAMENTO PARA DATA INICIO
+                        // Tratamento Inicio
                         if (event.getStart().getDateTime() != null) {
                             resumo.put("inicio", event.getStart().getDateTime().toString());
                         } else {
                             resumo.put("inicio", event.getStart().getDate().toString());
                         }
 
-                        // --- NOVO: TRATAMENTO PARA DATA FIM ---
+                        // Tratamento Fim
                         if (event.getEnd().getDateTime() != null) {
                             resumo.put("fim", event.getEnd().getDateTime().toString());
                         } else {
-                            // Se for dia inteiro, o fim geralmente é o dia seguinte
                             resumo.put("fim", event.getEnd().getDate().toString());
                         }
-                        // --------------------------------------
 
                         listaSimplificada.add(resumo);
                     }
                 }
             }
+
+            return ResponseEntity.ok(listaSimplificada);
+
         } catch (Exception e) {
             e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Erro ao buscar agenda: " + e.getMessage());
         }
-        return listaSimplificada;
     }
 
     // Método auxiliar para extrair o token da sessão

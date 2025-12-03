@@ -14,18 +14,18 @@ public class HealthmoneyApplication {
 		SpringApplication.run(HealthmoneyApplication.class, args);
 	}
 
-	// --- ADICIONE ESTE BLOCO ABAIXO ---
-	//@Bean
-	//public CommandLineRunner testarConexao(DataSource dataSource) {
-	//	return args -> {
-	//		try (Connection connection = dataSource.getConnection()) {
-	//			System.out.println("----------------------------------------");
-	//			System.out.println("✅ SUCESSO! CONEXÃO COM NEON REALIZADA!");
-	//			System.out.println("URL: " + connection.getMetaData().getURL());
-	//			System.out.println("----------------------------------------");
-	//		} catch (Exception e) {
-	//			System.err.println("❌ FALHA NA CONEXÃO: " + e.getMessage());
-	//		}
-	//	};
-	//}
+	//--- ADICIONE ESTE BLOCO ABAIXO ---
+	@Bean
+	public CommandLineRunner testarConexao(DataSource dataSource) {
+		return args -> {
+			try (Connection connection = dataSource.getConnection()) {
+				System.out.println("----------------------------------------");
+				System.out.println("✅ SUCESSO! CONEXÃO COM NEON REALIZADA!");
+				System.out.println("URL: " + connection.getMetaData().getURL());
+				System.out.println("----------------------------------------");
+			} catch (Exception e) {
+				System.err.println("❌ FALHA NA CONEXÃO: " + e.getMessage());
+			}
+		};
+	}
 }
