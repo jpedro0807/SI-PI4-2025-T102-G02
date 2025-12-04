@@ -22,10 +22,12 @@ export default function Layout() {
 	}, [location.pathname]);
 
 	return (
-		<div className='bg-gray-50 font-sans'>
+		<div className='flex min-h-screen bg-gray-50 font-sans'>
 			<Sidebar activePage={activePage} />
 
-			<Outlet />
+			<main className='flex-1 p-8 overflow-auto'>
+				<Outlet />
+			</main>
 		</div>
 	);
 }

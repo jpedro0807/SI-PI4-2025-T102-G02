@@ -1,12 +1,37 @@
-.card{
-background:var(--card);
-border-radius:12px;
-padding:18px;
-box-shadow: var(--shadow);
+.card {
+	background: var(--card);
+	border-radius: 12px;
+	padding: 18px;
+	box-shadow: var(--shadow);
 }
-.content{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.title{color:var(--muted);font-size:14px;margin-bottom:6px}
-.value{font-weight:700;font-size:22px}
-.subtitle{color:#9ca3af;font-size:13px;margin-top:6px}
-.iconWrap{width:56px;height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center}
-.icon{font-size:20px}
+.content {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+}
+.title {
+	color: var(--muted);
+	font-size: 14px;
+	margin-bottom: 6px;
+}
+.value {
+	font-weight: 700;
+	font-size: 22px;
+}
+.subtitle {
+	color: #9ca3af;
+	font-size: 13px;
+	margin-top: 6px;
+}
+.iconWrap {
+	width: 56px;
+	height: 56px;
+	border-radius: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.icon {
+	font-size: 20px;
+}
