@@ -43,6 +43,7 @@ export default function RelatoriosPage() {
 
     const fetchRelatorio = async () => {
         try {
+            setLoading(true);
             const response = await fetch(
                 `/api/relatorios/mensal?mes=${mesSelecionado}&ano=2025`
             );
@@ -104,18 +105,54 @@ export default function RelatoriosPage() {
         setNovaDespesa((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handleSalvarDespesa = () => {
-        // aqui você pode enviar para a API depois
-        console.log("Nova despesa:", novaDespesa);
+    // 🔗 INTEGRAÇÃO COM A API /api/relatorios/despesas
+    const handleSalvarDespesa = async () => {
+        try {
+            // validação simples
+            if (
+                !novaDespesa.categoria ||
+                !novaDespesa.descricao ||
+                !novaDespesa.valor ||
+                !novaDespesa.data
+            ) {
+                alert("Preencha todos os campos da despesa.");
+                return;
+            }
 
-        // reset básico
-        setNovaDespesa({
-            categoria: "",
-            descricao: "",
-            valor: "",
-            data: "",
-        });
-        setIsDespesaOpen(false);
+            const response = await fetch("/api/relatorios/despesas", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    descricao: novaDespesa.descricao,
+                    categoria: novaDespesa.categoria,
+                    valor: Number(novaDespesa.valor),
+                    dataPagamento: novaDespesa.data, // mapeia pro LocalDate do backend
+                }),
+            });
+
+            if (!response.ok) {
+                console.error("Erro ao salvar despesa:", response.status);
+                alert("Erro ao salvar despesa.");
+                return;
+            }
+
+            // reset básico
+            setNovaDespesa({
+                categoria: "",
+                descricao: "",
+                valor: "",
+                data: "",
+            });
+            setIsDespesaOpen(false);
+
+            // recarrega os dados do relatório
+            await fetchRelatorio();
+        } catch (error) {
+            console.error("Erro inesperado ao salvar despesa:", error);
+            alert("Erro inesperado ao salvar despesa.");
+        }
     };
 
     if (loading) return <div className="p-8">Carregando relatórios...</div>;
