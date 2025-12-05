@@ -14,7 +14,7 @@ public class HealthmoneyApplication {
 		SpringApplication.run(HealthmoneyApplication.class, args);
 	}
 
-	//--- ADICIONE ESTE BLOCO ABAIXO ---
+
 	@Bean
 	public CommandLineRunner testarConexao(DataSource dataSource) {
 		return args -> {

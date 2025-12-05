@@ -7,7 +7,7 @@ public record RelatorioFinanceiroDTO(
         BigDecimal receitaTotal,
         BigDecimal despesasTotais,
         BigDecimal saldo,
-        BigDecimal aReceber, // Mock para futuro (boletos pendentes)
+        BigDecimal aReceber,
         List<CategoriaValor> receitasPorCategoria,
         List<CategoriaValor> despesasPorCategoria
 ) {

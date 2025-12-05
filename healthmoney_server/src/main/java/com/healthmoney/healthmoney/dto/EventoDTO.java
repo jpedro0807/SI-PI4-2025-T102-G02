@@ -5,5 +5,5 @@ public record EventoDTO(
         String dataInicio,
         String dataFim,
         String descricao,
-        String emailPaciente // <--- NOVO CAMPO
+        String emailPaciente
 ) {}

@@ -59,7 +59,6 @@ public class CalendarController {
     @GetMapping("/listar")
     public ResponseEntity<?> listarEventos(OAuth2AuthenticationToken authentication) {
 
-        // BLINDAGEM 🛡️: Se o usuário não estiver logado, para aqui!
         if (authentication == null) {
             // Retorna 401 (Unauthorized). Isso avisa o React que a sessão caiu.
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -70,7 +69,6 @@ public class CalendarController {
             String accessToken = getAccessToken(authentication);
             List<Event> eventosGoogle = agendaService.listarProximosEventos(accessToken);
 
-            // ... (seu código de mapeamento dos eventos continua igual) ...
             List<Map<String, String>> listaSimplificada = new ArrayList<>();
 
             if (eventosGoogle != null) {

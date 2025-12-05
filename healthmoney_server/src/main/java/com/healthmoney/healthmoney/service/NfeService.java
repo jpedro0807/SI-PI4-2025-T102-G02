@@ -35,9 +35,7 @@ public class NfeService {
     private static final String API_KEY = "sk_f3084e3aa2aaf5554be643f0b29dec8fc3e92330";
     private static final String URL_CONVERSAO = "https://api.pdfshift.io/v3/convert/pdf";
 
-    // ==================================================================================
-    // MeTODO 1: GERA O PDF NA API EXTERNA (Visual)
-    // ==================================================================================
+
     public byte[] gerarNotaFiscalPdf(DadosNotaFiscal dados) {
         RestTemplate restTemplate = new RestTemplate();
 
@@ -182,9 +180,6 @@ public class NfeService {
         }
     }
 
-    // ==================================================================================
-    // MÉTODO 2: SALVA NO BANCO DE DADOS (Histórico)
-    // ==================================================================================
     @Transactional
     public NotaFiscal salvarNotaFiscal(DadosNotaFiscal dados) {
 

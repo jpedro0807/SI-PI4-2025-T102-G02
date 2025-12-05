@@ -53,7 +53,7 @@ public class GoogleAgendaService {
                 .setTimeZone("America/Sao_Paulo");
         event.setEnd(end);
 
-        // --- LÓGICA NOVA: ADICIONAR CONVIDADO (PACIENTE) ---
+
         if (dto.emailPaciente() != null && !dto.emailPaciente().isEmpty()) {
             EventAttendee convidado = new EventAttendee();
             convidado.setEmail(dto.emailPaciente());
@@ -61,7 +61,7 @@ public class GoogleAgendaService {
             // Adiciona à lista de participantes
             event.setAttendees(Collections.singletonList(convidado));
         }
-        // ---------------------------------------------------
+
 
         // O parâmetro 'sendUpdates=all' força o envio do e-mail de convite na hora
         return service.events().insert("primary", event)

@@ -39,8 +39,8 @@ public class PacienteService {
                 .orElseThrow(() -> new RuntimeException("Paciente não encontrado"));
 
         paciente.setNome(dados.nome());
-        paciente.setCpf(dados.cpf()); // Cuidado: CPF geralmente não se muda, mas deixarei aqui
-        paciente.setDataNascimento(dados.dataNascimento()); // Importante atualizar data também
+        paciente.setCpf(dados.cpf());
+        paciente.setDataNascimento(dados.dataNascimento());
         paciente.setEmail(dados.email());
         paciente.setTelefone(dados.telefone());
         paciente.setEndereco(dados.endereco());

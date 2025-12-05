@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@Table(name = "despesas") // <--- CORRIGIDO: Nome exato da sua tabela no Neon
+@Table(name = "despesas")
 public class Despesa {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

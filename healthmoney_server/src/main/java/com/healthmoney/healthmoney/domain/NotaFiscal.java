@@ -22,7 +22,7 @@ public class NotaFiscal {
     @JoinColumn(name = "paciente_id", nullable = false)
     private Paciente paciente;
 
-    // --- AQUI ESTÃO OS CAMPOS COM OS MESMOS NOMES DO DTO ---
+
 
     @Column(name = "nome_cliente") // Mapeia para a coluna do banco
     private String nomeCliente;

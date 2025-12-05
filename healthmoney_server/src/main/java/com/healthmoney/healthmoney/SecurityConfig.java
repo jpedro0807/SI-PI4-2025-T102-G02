@@ -26,9 +26,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        // AQUI ESTÁ O SEGREDO:
-                        // Mandamos ele voltar para o seu site React (porta 5173)
-                        // O parâmetro 'true' força essa ida.
+
                         .defaultSuccessUrl("http://localhost:5173/agenda", true)
                 );
 

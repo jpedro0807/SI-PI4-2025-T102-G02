@@ -79,7 +79,7 @@ public class NfeController {
     public ResponseEntity<byte[]> emitirNota(@RequestBody DadosNotaFiscal dados) {
 
         try {
-            // Salva no banco (Agora esse método está dentro do NfeService conforme sua alteração)
+
             nfeService.salvarNotaFiscal(dados);
         } catch (Exception e) {
             System.err.println("Erro de banco: " + e.getMessage());
