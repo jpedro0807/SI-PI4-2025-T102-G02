@@ -11,17 +11,22 @@ import {
 } from "lucide-react";
 
 export default function PacientesPage() {
+	// Lista de pacientes buscados na API
 	const [pacientes, setPacientes] = useState([]);
+	// Controle de abertura/fechamento do modal
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	// Estado de loading durante o submit do formulário
 	const [loading, setLoading] = useState(false);
+	// Termo de busca usado para filtrar pacientes (nome/CPF)
 	const [searchTerm, setSearchTerm] = useState("");
 
-	// Estado para erros de validação
+	// Estado para erros de validação por campo
 	const [errors, setErrors] = useState({});
 
-	// Estado para controlar a edição
+	// Guarda o ID do paciente que está sendo editado (null = novo)
 	const [editingId, setEditingId] = useState(null);
 
+	// Dados do formulário de cadastro/edição de paciente
 	const [formData, setFormData] = useState({
 		nome: "",
 		cpf: "",
@@ -31,10 +36,12 @@ export default function PacientesPage() {
 		endereco: "",
 	});
 
+	// Busca lista de pacientes na API
 	const fetchPacientes = async () => {
 		try {
 			const response = await fetch("/api/pacientes");
 			if (response.status === 401) {
+				// Se não autenticado, redireciona para login
 				window.location.href = "/login";
 				return;
 			}
@@ -45,20 +52,24 @@ export default function PacientesPage() {
 		}
 	};
 
+	// Chama fetchPacientes ao carregar a página
 	useEffect(() => {
 		fetchPacientes();
 	}, []);
 
 	// --- MÁSCARAS E FORMATAÇÃO ---
+
+	// Formata o valor digitado no input para o formato de CPF 000.000.000-00
 	const formatCPF = (value) => {
 		return value
-			.replace(/\D/g, "") // Remove tudo o que não é dígito
-			.replace(/(\d{3})(\d)/, "$1.$2") // Coloca um ponto entre o terceiro e o quarto dígitos
-			.replace(/(\d{3})(\d)/, "$1.$2") // Coloca um ponto entre o terceiro e o quarto dígitos
-			.replace(/(\d{3})(\d{1,2})/, "$1-$2") // Coloca um hífen entre o terceiro e o quarto dígitos
-			.replace(/(-\d{2})\d+?$/, "$1"); // Captura apenas os dois últimos dígitos
+			.replace(/\D/g, "") // Remove tudo que não for número
+			.replace(/(\d{3})(\d)/, "$1.$2") // 000.000...
+			.replace(/(\d{3})(\d)/, "$1.$2") // 000.000.000...
+			.replace(/(\d{3})(\d{1,2})/, "$1-$2") // 000.000.000-00
+			.replace(/(-\d{2})\d+?$/, "$1"); // Mantém apenas 2 dígitos após o hífen
 	};
 
+	// Formata telefone para o padrão (00) 00000-0000 ou (00) 0000-0000
 	const formatPhone = (value) => {
 		return value
 			.replace(/\D/g, "")
@@ -67,11 +78,11 @@ export default function PacientesPage() {
 			.replace(/(-\d{4})\d+?$/, "$1");
 	};
 
-	// --- VALIDAÇÃO ---
+	// --- VALIDAÇÃO DOS CAMPOS DO FORMULÁRIO ---
 	const validateForm = () => {
 		const newErrors = {};
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		// Regex simples para CPF (apenas formato, não verifica dígito verificador matemático)
+		// Regex simples para formato de CPF (não valida dígito verificador)
 		const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
 
 		// 1. Nome
@@ -88,13 +99,13 @@ export default function PacientesPage() {
 			newErrors.cpf = "CPF inválido. Formato: 000.000.000-00";
 		}
 
-		// 3. Data de Nascimento
+		// 3. Data de Nascimento (não pode ser vazia nem futura)
 		if (!formData.dataNascimento) {
 			newErrors.dataNascimento = "Data de nascimento é obrigatória.";
 		} else {
 			const dataNasc = new Date(formData.dataNascimento);
 			const hoje = new Date();
-			// Remove a hora para comparar apenas o dia
+			// Zera horas para comparar só a data
 			hoje.setHours(0, 0, 0, 0);
 
 			if (dataNasc > hoje) {
@@ -115,7 +126,7 @@ export default function PacientesPage() {
 		if (!formData.telefone) {
 			newErrors.telefone = "Telefone é obrigatório.";
 		} else if (formData.telefone.length < 14) {
-			// (11) 9999-9999 mínimo
+			// Considera incompleto se não atingir mínimo de caracteres
 			newErrors.telefone = "Telefone incompleto.";
 		}
 
@@ -127,14 +138,16 @@ export default function PacientesPage() {
 		}
 
 		setErrors(newErrors);
-		// Retorna true se não tiver erros
+		// Retorna true se não houver erros
 		return Object.keys(newErrors).length === 0;
 	};
 
-	// Função para Abrir o Modal
+	// Abre o modal para criar ou editar paciente
+	// Se receber um objeto paciente, preenche o formulário com os dados dele
 	const openModal = (paciente = null) => {
 		setErrors({}); // Limpa erros anteriores
 		if (paciente) {
+			// Modo edição
 			setEditingId(paciente.id);
 			setFormData({
 				nome: paciente.nome,
@@ -145,6 +158,7 @@ export default function PacientesPage() {
 				endereco: paciente.endereco || "",
 			});
 		} else {
+			// Modo novo cadastro
 			setEditingId(null);
 			setFormData({
 				nome: "",
@@ -158,17 +172,19 @@ export default function PacientesPage() {
 		setIsModalOpen(true);
 	};
 
+	// Exclui um paciente após confirmação
 	const handleDelete = async (id) => {
 		if (confirm("Tem certeza que deseja excluir este paciente?")) {
 			await fetch(`/api/pacientes/${id}`, { method: "DELETE" });
-			fetchPacientes();
+			fetchPacientes(); // Atualiza lista após exclusão
 		}
 	};
 
+	// Envio do formulário (criação ou edição de paciente)
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
-		// Roda a validação antes de enviar
+		// Valida campos antes de enviar
 		if (!validateForm()) {
 			return;
 		}
@@ -176,6 +192,7 @@ export default function PacientesPage() {
 		setLoading(true);
 
 		try {
+			// Define URL e método conforme é edição ou criação
 			const url = editingId
 				? `/api/pacientes/${editingId}`
 				: "/api/pacientes";
@@ -190,10 +207,11 @@ export default function PacientesPage() {
 			if (response.ok) {
 				alert(editingId ? "Paciente atualizado!" : "Paciente cadastrado!");
 				setIsModalOpen(false);
-				fetchPacientes();
+				fetchPacientes(); // Recarrega lista
 			} else {
+				// Lê mensagem de erro do backend (ex: CPF duplicado)
 				const errorText = await response.text();
-				alert("Erro ao salvar: " + errorText); // Mostra erro do backend se houver (ex: CPF duplicado)
+				alert("Erro ao salvar: " + errorText);
 			}
 		} catch (error) {
 			console.error(error);
@@ -202,18 +220,21 @@ export default function PacientesPage() {
 		}
 	};
 
+	// Aplica filtro em memória por nome (case insensitive) ou CPF
 	const pacientesFiltrados = pacientes.filter(
 		(p) =>
 			p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			p.cpf.includes(searchTerm)
 	);
 
+	// Calcula a idade a partir da data de nascimento
 	const calcularIdade = (data) => {
 		if (!data) return "-";
 		const hoje = new Date();
 		const nasc = new Date(data);
 		let idade = hoje.getFullYear() - nasc.getFullYear();
 		const m = hoje.getMonth() - nasc.getMonth();
+		// Ajuste caso ainda não tenha feito aniversário no ano atual
 		if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) {
 			idade--;
 		}
@@ -222,6 +243,7 @@ export default function PacientesPage() {
 
 	return (
 		<main className='flex-1 ml-64 p-8 relative'>
+			{/* Cabeçalho da página com título e botão de novo paciente */}
 			<header className='flex justify-between items-center mb-8'>
 				<div>
 					<h2 className='text-3xl font-bold text-gray-900'>Pacientes</h2>
@@ -236,6 +258,7 @@ export default function PacientesPage() {
 				</button>
 			</header>
 
+			{/* Campo de busca por nome ou CPF */}
 			<div className='bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 relative'>
 				<Search className='absolute left-7 top-7 text-gray-400' size={20} />
 				<input
@@ -247,7 +270,9 @@ export default function PacientesPage() {
 				/>
 			</div>
 
+			{/* Lista ou estado vazio */}
 			{pacientes.length === 0 ? (
+				// Estado vazio quando não há pacientes cadastrados
 				<div className='bg-white p-6 rounded-xl shadow-sm border border-gray-100 min-h-[400px] flex flex-col items-center justify-center'>
 					<Users size={48} className='text-gray-300' />
 					<p className='text-gray-500 mt-4 text-sm font-medium'>
@@ -255,6 +280,7 @@ export default function PacientesPage() {
 					</p>
 				</div>
 			) : (
+				// Tabela com pacientes filtrados
 				<div className='bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden'>
 					<table className='w-full text-left'>
 						<thead className='bg-gray-50 border-b border-gray-100'>
@@ -282,6 +308,7 @@ export default function PacientesPage() {
 									<td className='p-4 font-medium text-gray-900'>
 										{paciente.nome}
 										<br />
+										{/* Exibe e-mail em menor destaque */}
 										<span className='text-xs text-gray-400'>
 											{paciente.email}
 										</span>
@@ -295,11 +322,13 @@ export default function PacientesPage() {
 										{paciente.telefone}
 									</td>
 									<td className='p-4 text-right flex justify-end gap-2'>
+										{/* Botão editar paciente */}
 										<button
 											onClick={() => openModal(paciente)}
 											className='p-2 text-blue-500 hover:bg-blue-50 rounded-lg'>
 											<Edit size={18} />
 										</button>
+										{/* Botão excluir paciente */}
 										<button
 											onClick={() => handleDelete(paciente.id)}
 											className='p-2 text-red-500 hover:bg-red-50 rounded-lg'>
@@ -313,10 +342,11 @@ export default function PacientesPage() {
 				</div>
 			)}
 
-			{/* MODAL */}
+			{/* MODAL DE CADASTRO/EDIÇÃO */}
 			{isModalOpen && (
 				<div className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4'>
 					<div className='bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]'>
+						{/* Cabeçalho do modal */}
 						<div className='flex justify-between items-center p-5 border-b'>
 							<h3 className='text-xl font-bold text-gray-800'>
 								{editingId ? "Editar Paciente" : "Novo Paciente"}
@@ -329,6 +359,7 @@ export default function PacientesPage() {
 							</button>
 						</div>
 
+						{/* Formulário de paciente */}
 						<form
 							onSubmit={handleSubmit}
 							className='p-5 space-y-4 overflow-y-auto'>
@@ -499,6 +530,7 @@ export default function PacientesPage() {
 								)}
 							</div>
 
+							{/* BOTÃO SALVAR/ATUALIZAR */}
 							<div className='pt-2'>
 								<button
 									type='submit'

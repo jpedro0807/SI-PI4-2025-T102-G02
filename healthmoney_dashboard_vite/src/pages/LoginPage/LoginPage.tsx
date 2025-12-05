@@ -2,18 +2,20 @@ import React from "react";
 import { Activity } from "lucide-react"; // Ícone que lembra saúde/finanças
 
 export default function LoginPage() {
-	// Função que chama sua API Java para iniciar o fluxo do Google
+	// Função que inicia o fluxo de login com Google via backend (Spring Security)
 	const handleGoogleLogin = () => {
-		// Redireciona o navegador para a rota do Spring Security
-		// O Proxy do Vite vai mandar isso para http://localhost:8080/loginGoogle
+		// Redireciona o usuário para a rota de login do backend
+		// Aqui está apontando diretamente para o backend em http://localhost:8080/login
+		// (poderia ser /login se estivesse passando por um proxy no front)
 		window.location.href = "http://localhost:8080/login";
 	};
 
 	return (
 		<div className='min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
-			{/* Cabeçalho com Logo */}
+			{/* Cabeçalho com logo e título do sistema */}
 			<div className='sm:mx-auto sm:w-full sm:max-w-md text-center'>
 				<div className='flex justify-center items-center gap-2 mb-6'>
+					{/* “Logo” simples usando ícone Activity dentro de um card verde */}
 					<div className='w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center'>
 						<Activity size={32} className='text-emerald-600' />
 					</div>
@@ -26,7 +28,7 @@ export default function LoginPage() {
 				</p>
 			</div>
 
-			{/* Card de Login */}
+			{/* Card de Login centralizado */}
 			<div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
 				<div className='bg-white py-8 px-4 shadow-xl shadow-gray-100 sm:rounded-xl sm:px-10 border border-gray-100'>
 					<div className='space-y-6'>
@@ -35,10 +37,11 @@ export default function LoginPage() {
 								Acesse sua conta
 							</h3>
 
+							{/* Botão principal de login com Google */}
 							<button
 								onClick={handleGoogleLogin}
 								className='w-full flex justify-center items-center gap-3 px-4 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all'>
-								{/* Ícone do Google SVG */}
+								{/* Ícone do Google em SVG (estático, sem dependência externa) */}
 								<svg className='h-5 w-5' viewBox='0 0 24 24'>
 									<path
 										d='M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z'
@@ -61,6 +64,7 @@ export default function LoginPage() {
 							</button>
 						</div>
 
+						{/* Separador visual com texto informativo sobre segurança/OAuth */}
 						<div className='relative'>
 							<div className='absolute inset-0 flex items-center'>
 								<div className='w-full border-t border-gray-200' />
@@ -74,7 +78,7 @@ export default function LoginPage() {
 					</div>
 				</div>
 
-				{/* Rodapé */}
+				{/* Rodapé da tela de login */}
 				<p className='mt-6 text-center text-xs text-gray-400'>
 					&copy; 2025 Health Money. Todos os direitos reservados.
 				</p>
