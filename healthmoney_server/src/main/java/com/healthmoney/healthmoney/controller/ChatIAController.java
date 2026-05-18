@@ -90,29 +90,30 @@ public class ChatIAController {
             String respostaIA = (String) responsePython.getBody().get("resposta");
 
             // ==========================================
-            // INTERCEPTADOR DE COMANDOS DA IA
+            // INTERCEPTADOR DE COMANDOS DA IA (ATUALIZADO PARA 6 DADOS)
             // ==========================================
-            // ==========================================
-            // INTERCEPTADOR DE COMANDOS DA IA (AGORA REAL)
-            // ==========================================
-            // ==========================================
-            // INTERCEPTADOR DE COMANDOS DA IA (5 DADOS)
-            // ==========================================
-            if (respostaIA.contains("[AGENDAR]")) {
+            respostaIA = respostaIA.replace("\\_", "_");
+            if (respostaIA.contains("[GERAR_AGENDA_GOOGLE]")) {
                 try {
-                    String dadosLimpos = respostaIA.replace("[AGENDAR]", "").replace("[/INST]", "").trim();
+
+                    int indiceTag = respostaIA.indexOf("[GERAR_AGENDA_GOOGLE]");
+                    String dadosPuros = respostaIA.substring(indiceTag);
+
+                    String dadosLimpos = dadosPuros.replace("[GERAR_AGENDA_GOOGLE]", "").replace("[/INST]", "").trim();
                     String[] partes = dadosLimpos.split("\\|");
 
-                    if(partes.length >= 5) {
+                    // Agora verificamos se tem 6 partes, pois a IA também manda o CPF!
+                    if(partes.length >= 6) {
                         String nome = partes[0].trim();
-                        String data = partes[1].trim();
-                        String hora = partes[2].trim();
-                        String email = partes[3].trim();
-                        String descricao = partes[4].trim();
+                        String cpf = partes[1].trim(); // Adicionamos a captura do CPF para não quebrar a ordem
+                        String data = partes[2].trim();
+                        String hora = partes[3].trim();
+                        String email = partes[4].trim();
+                        String descricao = partes[5].trim();
 
-                        // TRAVA DE SEGURANÇA: Impede que o Java quebre se a IA mandar a palavra "Data" ou "Nome"
+                        // TRAVA DE SEGURANÇA
                         if (nome.equalsIgnoreCase("Nome") || !data.contains("/")) {
-                            respostaIA = "❌ Entendido! Mas faltaram dados para o agendamento. Por favor, forneça todos os 5 dados: Nome, Data (DD/MM), Horário, Email e Descrição.";
+                            respostaIA = "❌ Entendido! Mas faltaram dados para o agendamento. Por favor, forneça todos os dados necessários.";
                         } else {
                             // Formatação de data ISO e Correção de Segundos
                             int anoAtual = java.time.LocalDate.now().getYear();
@@ -138,12 +139,14 @@ public class ChatIAController {
                                     descricao,             // 4. descricao
                                     email                  // 5. emailPaciente
                             );
+
                             String accessToken = getAccessToken(authentication);
 
                             if (accessToken == null) {
                                 respostaIA = "❌ Acesso Negado: O seu token do Google não foi encontrado. Você está logado no sistema?";
                             } else {
                                 googleAgendaService.criarEvento(accessToken, evento);
+                                // Modificamos a mensagem para usar a palavra reservada [FINALIZADO] se o seu front-end usar isso, se não pode deixar só a mensagem limpa
                                 respostaIA = "✅ Agendamento Realizado! A consulta de **" + nome + "** (" + descricao + ") está no Google Calendar e o convite foi enviado para o email: " + email;
                             }
                         }
@@ -154,7 +157,7 @@ public class ChatIAController {
                     respostaIA = "❌ Ocorreu um erro interno ao salvar no Google Calendar: " + e.getMessage();
                 }
             }
-            // ==========================================
+
 
             Map<String, String> respostaParaReact = new HashMap<>();
             respostaParaReact.put("resposta", respostaIA);
