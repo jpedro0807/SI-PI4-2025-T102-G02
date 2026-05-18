@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar/Sidebar";
+import ChatBot from "./ChatBot";
 
 function getActivePage(pathname) {
 	if (pathname === "/") return "dashboard";
@@ -14,7 +15,7 @@ function getActivePage(pathname) {
 export default function Layout() {
 	const location = useLocation();
 	const [activePage, setActivePage] = useState(
-		getActivePage(location.pathname)
+		getActivePage(location.pathname),
 	);
 
 	useEffect(() => {
@@ -24,7 +25,7 @@ export default function Layout() {
 	return (
 		<div className='flex min-h-screen bg-gray-50 font-sans'>
 			<Sidebar activePage={activePage} />
-
+			<ChatBot></ChatBot>
 			<main className='flex-1 p-8 overflow-auto'>
 				<Outlet />
 			</main>
