@@ -1,3 +1,4 @@
+[README.md](https://github.com/user-attachments/files/23967391/README.md)
 # 🧾 HealthMoney --- Sistema de Gestão Financeira e Clínica
 
 O **HealthMoney** é uma aplicação completa para gestão financeira e
