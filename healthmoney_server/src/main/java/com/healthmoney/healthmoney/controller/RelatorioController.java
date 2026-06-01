@@ -1,13 +1,12 @@
 package com.healthmoney.healthmoney.controller;
 
+import com.healthmoney.healthmoney.domain.Despesa;
 import com.healthmoney.healthmoney.dto.RelatorioFinanceiroDTO;
 import com.healthmoney.healthmoney.repository.DespesaRepository;
 import com.healthmoney.healthmoney.repository.NotaFiscalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -52,5 +51,11 @@ public class RelatorioController {
         }
 
         return new RelatorioFinanceiroDTO(receita, despesas, saldo, BigDecimal.ZERO, catReceitas, catDespesas);
+    }
+
+    @PostMapping("/despesas")
+    public ResponseEntity<Despesa> cadastrarDespesa(@RequestBody Despesa despesa) {
+        Despesa salva = despesaRepository.save(despesa);
+        return ResponseEntity.ok(salva);
     }
 }

@@ -17,18 +17,13 @@ import {
 
 import * as XLSX from "xlsx";
 
-// Cores para os gráficos
-const COLORS_REC = ["#10b981", "#34d399", "#6ee7b7"]; // Tons de Verde
-const COLORS_DESP = ["#ef4444", "#f87171", "#fca5a5"]; // Tons de Vermelho
+const COLORS_REC = ["#10b981", "#34d399", "#6ee7b7"];
+const COLORS_DESP = ["#ef4444", "#f87171", "#fca5a5"];
 
 export default function RelatoriosPage() {
     const [dados, setDados] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [mesSelecionado, setMesSelecionado] = useState(
-        new Date().getMonth() + 1
-    );
 
-    // controle do modal de despesa
     const [isDespesaOpen, setIsDespesaOpen] = useState(false);
     const [novaDespesa, setNovaDespesa] = useState({
         categoria: "",
@@ -39,14 +34,12 @@ export default function RelatoriosPage() {
 
     useEffect(() => {
         fetchRelatorio();
-    }, [mesSelecionado]);
+    }, []);
 
     const fetchRelatorio = async () => {
         try {
             setLoading(true);
-            const response = await fetch(
-                `/api/relatorios/mensal?mes=${mesSelecionado}&ano=2025`
-            );
+            const response = await fetch("/api/relatorios/mensal");
 
             if (response.status === 401) {
                 console.warn("Sessão expirada. Redirecionando...");
@@ -68,9 +61,7 @@ export default function RelatoriosPage() {
 
         const wb = XLSX.utils.book_new();
 
-        // Aba 1 - Resumo Geral
         const resumoData = [
-            { Indicador: "Mês de Referência", Valor: `${mesSelecionado}/2025` },
             { Indicador: "Receita Total", Valor: dados.receitaTotal },
             { Indicador: "Despesas Totais", Valor: dados.despesasTotais },
             { Indicador: "Saldo Final", Valor: dados.saldo },
@@ -80,7 +71,6 @@ export default function RelatoriosPage() {
         wsResumo["!cols"] = [{ wch: 25 }, { wch: 15 }];
         XLSX.utils.book_append_sheet(wb, wsResumo, "Resumo Geral");
 
-        // Aba 2 - Receitas
         const receitasData = dados.receitasPorCategoria.map((item) => ({
             Categoria: item.nome,
             Valor: item.valor,
@@ -89,7 +79,6 @@ export default function RelatoriosPage() {
         wsReceitas["!cols"] = [{ wch: 30 }, { wch: 15 }];
         XLSX.utils.book_append_sheet(wb, wsReceitas, "Detalhe Receitas");
 
-        // Aba 3 - Despesas
         const despesasData = dados.despesasPorCategoria.map((item) => ({
             Categoria: item.nome,
             Valor: item.valor,
@@ -98,17 +87,15 @@ export default function RelatoriosPage() {
         wsDespesas["!cols"] = [{ wch: 30 }, { wch: 15 }];
         XLSX.utils.book_append_sheet(wb, wsDespesas, "Detalhe Despesas");
 
-        XLSX.writeFile(wb, `Relatorio_Financeiro_${mesSelecionado}_2025.xlsx`);
+        XLSX.writeFile(wb, `Relatorio_Financeiro.xlsx`);
     };
 
     const handleChangeDespesa = (field, value) => {
         setNovaDespesa((prev) => ({ ...prev, [field]: value }));
     };
 
-    // 🔗 INTEGRAÇÃO COM A API /api/relatorios/despesas
     const handleSalvarDespesa = async () => {
         try {
-            // validação simples
             if (
                 !novaDespesa.categoria ||
                 !novaDespesa.descricao ||
@@ -128,7 +115,7 @@ export default function RelatoriosPage() {
                     descricao: novaDespesa.descricao,
                     categoria: novaDespesa.categoria,
                     valor: Number(novaDespesa.valor),
-                    dataPagamento: novaDespesa.data, // mapeia pro LocalDate do backend
+                    dataPagamento: novaDespesa.data,
                 }),
             });
 
@@ -138,16 +125,8 @@ export default function RelatoriosPage() {
                 return;
             }
 
-            // reset básico
-            setNovaDespesa({
-                categoria: "",
-                descricao: "",
-                valor: "",
-                data: "",
-            });
+            setNovaDespesa({ categoria: "", descricao: "", valor: "", data: "" });
             setIsDespesaOpen(false);
-
-            // recarrega os dados do relatório
             await fetchRelatorio();
         } catch (error) {
             console.error("Erro inesperado ao salvar despesa:", error);
@@ -160,7 +139,6 @@ export default function RelatoriosPage() {
 
     return (
         <main className="flex-1 ml-64 p-8 bg-gray-50 min-h-screen">
-            {/* HEADER */}
             <header className="flex justify-between items-center mb-8">
                 <div>
                     <h2 className="text-3xl font-bold text-gray-900">
@@ -172,19 +150,6 @@ export default function RelatoriosPage() {
                 </div>
 
                 <div className="flex gap-3">
-                    <select
-                        className="bg-white border border-gray-200 rounded-lg px-4 py-2 text-gray-700 outline-none focus:ring-2 focus:ring-emerald-200"
-                        value={mesSelecionado}
-                        onChange={(e) => setMesSelecionado(e.target.value)}
-                    >
-                        <option value="1">Janeiro</option>
-                        <option value="2">Fevereiro</option>
-                        <option value="3">Março</option>
-                        <option value="4">Abril</option>
-                        <option value="12">Dezembro</option>
-                    </select>
-
-                    {/* BOTÃO DESPESA */}
                     <button
                         className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
                         onClick={() => setIsDespesaOpen(true)}
@@ -201,7 +166,6 @@ export default function RelatoriosPage() {
                 </div>
             </header>
 
-            {/* CARDS DE RESUMO */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <RelatorioCard
                     title="Receita Total"
@@ -229,9 +193,7 @@ export default function RelatoriosPage() {
                 />
             </div>
 
-            {/* ÁREA DOS GRÁFICOS */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* GRÁFICO DE RECEITAS */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h3 className="font-bold text-gray-800 mb-6">
                         Receitas por Categoria
@@ -249,29 +211,12 @@ export default function RelatoriosPage() {
                                         paddingAngle={5}
                                         dataKey="valor"
                                     >
-                                        {dados.receitasPorCategoria.map(
-                                            (entry, index) => (
-                                                <Cell
-                                                    key={`cell-${index}`}
-                                                    fill={
-                                                        COLORS_REC[
-                                                            index %
-                                                                COLORS_REC.length
-                                                        ]
-                                                    }
-                                                />
-                                            )
-                                        )}
+                                        {dados.receitasPorCategoria.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS_REC[index % COLORS_REC.length]} />
+                                        ))}
                                     </Pie>
-                                    <Tooltip
-                                        formatter={(value) =>
-                                            `R$ ${value.toFixed(2)}`
-                                        }
-                                    />
-                                    <Legend
-                                        verticalAlign="bottom"
-                                        height={36}
-                                    />
+                                    <Tooltip formatter={(value) => `R$ ${value.toFixed(2)}`} />
+                                    <Legend verticalAlign="bottom" height={36} />
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
@@ -282,7 +227,6 @@ export default function RelatoriosPage() {
                     </div>
                 </div>
 
-                {/* GRÁFICO DE DESPESAS */}
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h3 className="font-bold text-gray-800 mb-6">
                         Despesas por Categoria
@@ -300,29 +244,12 @@ export default function RelatoriosPage() {
                                         paddingAngle={5}
                                         dataKey="valor"
                                     >
-                                        {dados.despesasPorCategoria.map(
-                                            (entry, index) => (
-                                                <Cell
-                                                    key={`cell-${index}`}
-                                                    fill={
-                                                        COLORS_DESP[
-                                                            index %
-                                                                COLORS_DESP.length
-                                                        ]
-                                                    }
-                                                />
-                                            )
-                                        )}
+                                        {dados.despesasPorCategoria.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS_DESP[index % COLORS_DESP.length]} />
+                                        ))}
                                     </Pie>
-                                    <Tooltip
-                                        formatter={(value) =>
-                                            `R$ ${value.toFixed(2)}`
-                                        }
-                                    />
-                                    <Legend
-                                        verticalAlign="bottom"
-                                        height={36}
-                                    />
+                                    <Tooltip formatter={(value) => `R$ ${value.toFixed(2)}`} />
+                                    <Legend verticalAlign="bottom" height={36} />
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
@@ -334,11 +261,9 @@ export default function RelatoriosPage() {
                 </div>
             </div>
 
-            {/* MODAL CADASTRAR DESPESA */}
             {isDespesaOpen && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-xl p-8 relative">
-                        {/* Fechar */}
                         <button
                             onClick={() => setIsDespesaOpen(false)}
                             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl"
@@ -360,12 +285,7 @@ export default function RelatoriosPage() {
                                     className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
                                     placeholder="Ex: Aluguel, Água, Luz..."
                                     value={novaDespesa.categoria}
-                                    onChange={(e) =>
-                                        handleChangeDespesa(
-                                            "categoria",
-                                            e.target.value
-                                        )
-                                    }
+                                    onChange={(e) => handleChangeDespesa("categoria", e.target.value)}
                                 />
                             </div>
 
@@ -378,12 +298,7 @@ export default function RelatoriosPage() {
                                     className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
                                     placeholder="Ex: Conta de luz de novembro"
                                     value={novaDespesa.descricao}
-                                    onChange={(e) =>
-                                        handleChangeDespesa(
-                                            "descricao",
-                                            e.target.value
-                                        )
-                                    }
+                                    onChange={(e) => handleChangeDespesa("descricao", e.target.value)}
                                 />
                             </div>
 
@@ -397,12 +312,7 @@ export default function RelatoriosPage() {
                                         className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
                                         placeholder="0,00"
                                         value={novaDespesa.valor}
-                                        onChange={(e) =>
-                                            handleChangeDespesa(
-                                                "valor",
-                                                e.target.value
-                                            )
-                                        }
+                                        onChange={(e) => handleChangeDespesa("valor", e.target.value)}
                                     />
                                 </div>
 
@@ -414,12 +324,7 @@ export default function RelatoriosPage() {
                                         type="date"
                                         className="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
                                         value={novaDespesa.data}
-                                        onChange={(e) =>
-                                            handleChangeDespesa(
-                                                "data",
-                                                e.target.value
-                                            )
-                                        }
+                                        onChange={(e) => handleChangeDespesa("data", e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -446,7 +351,6 @@ export default function RelatoriosPage() {
     );
 }
 
-// Componente Card Auxiliar
 function RelatorioCard({ title, value, icon: Icon, color }) {
     const colorClasses = {
         emerald: "bg-emerald-50 text-emerald-600",
@@ -459,9 +363,7 @@ function RelatorioCard({ title, value, icon: Icon, color }) {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <div className="flex justify-between items-start">
                 <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">
-                        {title}
-                    </p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
                     <h3 className="text-2xl font-bold text-gray-900">
                         R$ {value ? value.toFixed(2) : "0.00"}
                     </h3>
