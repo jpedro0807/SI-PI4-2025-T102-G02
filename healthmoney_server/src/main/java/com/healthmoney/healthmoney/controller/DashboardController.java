@@ -58,6 +58,13 @@ public class DashboardController {
             historico.add(new DashboardDTO.DadosGrafico(nomeMes, valor));
         }
 
-        return new DashboardDTO(totalPacientes, atendimentosMes, receitaMes, saldoMes, historico);
+        // 3. DADOS PARA O GRÁFICO DE PIZZA (Atendimentos por Tipo)
+        List<DashboardDTO.AtendimentoTipo> atendimentosPorTipo = notaFiscalRepository
+                .contarAtendimentosPorTipo()
+                .stream()
+                .map(row -> new DashboardDTO.AtendimentoTipo((String) row[0], (Long) row[1]))
+                .toList();
+
+        return new DashboardDTO(totalPacientes, atendimentosMes, receitaMes, saldoMes, historico, atendimentosPorTipo);
     }
 }

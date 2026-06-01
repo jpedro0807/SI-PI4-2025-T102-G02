@@ -14,7 +14,13 @@ import {
 	CartesianGrid,
 	Tooltip,
 	ResponsiveContainer,
+	PieChart,
+	Pie,
+	Cell,
+	Legend,
 } from "recharts";
+
+const PIE_COLORS = ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ef4444", "#06b6d4"];
 
 export default function DashboardPage() {
 	// Estado que armazena os dados retornados da API /api/dashboard
@@ -189,13 +195,45 @@ export default function DashboardPage() {
 					</div>
 				</div>
 
-				{/* Card Lateral (placeholder para futuro gráfico de tipos de atendimento) */}
+				{/* Card Lateral - Gráfico de Atendimentos por Tipo */}
 				<div className='bg-white p-6 rounded-xl shadow-sm border border-gray-100'>
 					<h3 className='font-bold text-gray-800 mb-6'>
 						Atendimentos por Tipo
 					</h3>
-					<div className='flex flex-col items-center justify-center h-[250px] text-gray-400 text-sm border-2 border-dashed border-gray-100 rounded-lg'>
-						<p>Em breve: Gráfico de Pizza</p>
+					<div className='h-[250px] w-full'>
+						{data.atendimentosPorTipo && data.atendimentosPorTipo.length > 0 ? (
+							<>
+								<ResponsiveContainer width='100%' height='90%'>
+									<PieChart>
+										<Pie
+											data={data.atendimentosPorTipo}
+											dataKey='quantidade'
+											nameKey='tipo'
+											cx='50%'
+											cy='50%'
+											innerRadius={55}
+											outerRadius={80}
+											paddingAngle={4}
+										>
+											{data.atendimentosPorTipo.map((_, index) => (
+												<Cell
+													key={index}
+													fill={PIE_COLORS[index % PIE_COLORS.length]}
+												/>
+											))}
+										</Pie>
+										<Tooltip formatter={(value, name) => [value, name]} />
+									</PieChart>
+								</ResponsiveContainer>
+								<p className='text-center text-xs text-gray-400 mt-1'>
+									Passe o mouse sobre o gráfico para ver o tipo
+								</p>
+							</>
+						) : (
+							<div className='flex items-center justify-center h-full text-gray-400 text-sm'>
+								Sem atendimentos registrados
+							</div>
+						)}
 					</div>
 				</div>
 			</div>

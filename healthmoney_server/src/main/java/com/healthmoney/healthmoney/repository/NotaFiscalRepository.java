@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface NotaFiscalRepository extends JpaRepository<NotaFiscal, Long> {
 
@@ -16,4 +17,8 @@ public interface NotaFiscalRepository extends JpaRepository<NotaFiscal, Long> {
     // 2. Conta quantas notas foram emitidas no mês (Representa atendimentos)
     @Query("SELECT COUNT(n) FROM NotaFiscal n WHERE YEAR(n.dataEmissao) = :ano AND MONTH(n.dataEmissao) = :mes")
     long contarNotasNoMes(@Param("ano") int ano, @Param("mes") int mes);
+
+    // 3. Agrupa itens de nota por descrição para o gráfico de atendimentos por tipo
+    @Query("SELECT i.descricao, COUNT(i) FROM ItemNotaFiscal i GROUP BY i.descricao ORDER BY COUNT(i) DESC")
+    List<Object[]> contarAtendimentosPorTipo();
 }

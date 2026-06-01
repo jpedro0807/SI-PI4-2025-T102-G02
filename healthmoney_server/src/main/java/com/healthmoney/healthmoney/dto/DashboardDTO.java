@@ -8,8 +8,9 @@ public record DashboardDTO(
         long atendimentosMes,
         BigDecimal receitaMes,
         BigDecimal saldoMes,
-        List<DadosGrafico> fluxoCaixa
+        List<DadosGrafico> fluxoCaixa,
+        List<AtendimentoTipo> atendimentosPorTipo
 ) {
-    // Objeto interno para montar o gráfico de linha
     public record DadosGrafico(String mes, BigDecimal valor) {}
+    public record AtendimentoTipo(String tipo, long quantidade) {}
 }
