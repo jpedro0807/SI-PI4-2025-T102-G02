@@ -46,6 +46,9 @@ export default function AgendaPage() {
 	// Estado de loading para bloquear botão e mostrar ícone de carregamento
 	const [loading, setLoading] = useState(false);
 
+	// Estado do evento selecionado para exclusão
+	const [eventoSelecionado, setEventoSelecionado] = useState(null);
+
 	// Estado do formulário de novo agendamento
 	const [novoEvento, setNovoEvento] = useState({
 		titulo: "",
@@ -58,6 +61,23 @@ export default function AgendaPage() {
 
 	// Estado para armazenar erros de validação dos campos
 	const [errors, setErrors] = useState({});
+
+	const handleDeletarEvento = async () => {
+		if (!eventoSelecionado) return;
+		try {
+			const response = await fetch(`/api/agenda/deletar/${eventoSelecionado.resource.id}`, {
+				method: "DELETE",
+			});
+			if (response.status === 401) {
+				window.location.href = "/login";
+				return;
+			}
+			setEventoSelecionado(null);
+			fetchEvents();
+		} catch (error) {
+			console.error("Erro ao deletar evento:", error);
+		}
+	};
 
 	// Função responsável por buscar eventos na API
 	const fetchEvents = async () => {
@@ -238,6 +258,7 @@ export default function AgendaPage() {
 					defaultView='month'
 					views={["month", "week", "day"]}
 					style={{ height: "700px" }}
+					onSelectEvent={(event) => setEventoSelecionado(event)}
 					className='font-sans text-gray-600'
 					eventPropGetter={(event) => ({
 						// Estilização dos eventos no calendário
@@ -251,6 +272,33 @@ export default function AgendaPage() {
 					})}
 				/>
 			</div>
+
+			{/* Modal de confirmação de exclusão */}
+			{eventoSelecionado && (
+				<div className='fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4'>
+					<div className='bg-white rounded-xl shadow-2xl w-full max-w-sm p-6'>
+						<h3 className='text-lg font-bold text-gray-800 mb-2'>Excluir Agendamento</h3>
+						<p className='text-gray-600 mb-1'>
+							<span className='font-medium'>{eventoSelecionado.title}</span>
+						</p>
+						<p className='text-sm text-gray-400 mb-6'>
+							{eventoSelecionado.start.toLocaleString("pt-BR")}
+						</p>
+						<div className='flex gap-3 justify-end'>
+							<button
+								onClick={() => setEventoSelecionado(null)}
+								className='px-4 py-2 text-sm text-gray-600 hover:text-gray-800'>
+								Cancelar
+							</button>
+							<button
+								onClick={handleDeletarEvento}
+								className='px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-lg hover:bg-red-700'>
+								Excluir
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 
 			{/* Modal de criação de agendamento */}
 			{isModalOpen && (
